@@ -201,6 +201,7 @@ for course in courses:
                         "rich_text": [{"text": {"content": canvas_id}}]
                     },
                 },
+                template={"type": "default"},
             )
 
             existing_canvas_ids.add(canvas_id)
