@@ -105,7 +105,7 @@ existing_canvas_ids = fetch_existing_canvas_ids()
 # TIME WINDOW
 # =====================
 now = datetime.now(timezone.utc)
-week_out = now + timedelta(days=7)
+week_out = now + timedelta(days=14)
 
 logger.info(
     "Scanning assignments due between %s and %s",
