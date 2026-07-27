@@ -1,2 +1,4 @@
 canvasapi~=3.4.0
 notion-client~=2.7.0
+icalendar~=7.0
+requests
