@@ -8,6 +8,7 @@ import icalendar
 import requests
 from notion_client import Client
 
+from notionPlaywright import updateReminders
 from privVars import NOTION_API_KEY, NOTION_DATABASE_ID, name_map, ICAL_URL, CANVAS_URL
 
 LOG_FILE = "calendar_notion_sync.log"
@@ -250,12 +251,14 @@ for event in calendar_feed.walk("VEVENT"):
         event_uid,
         )
 
+    newPages = []
     try:
-        notion.pages.create(
+        newPage = notion.pages.create(
             parent={"data_source_id": NOTION_DATABASE_ID},
             properties=notion_properties,
             template={"type": "default"},
         )
+        newPages.append(newPage["url"])
         existing_event_ids.add(event_uid)
         logger.info("Added event: %s -> %s", assign_title or summary or event_uid, class_select)
     except Exception:
@@ -264,6 +267,11 @@ for event in calendar_feed.walk("VEVENT"):
             assign_title or summary or event_uid,
             event_uid,
             )
+    
+    try:
+        updateReminders(newPages)
+    except Exception as err:
+        logger.exception(f"Failed to update reminders: {err}")
 
 logger.debug("Finished feed scan, checked %d events", event_count)
 logger.info("Sync run complete")

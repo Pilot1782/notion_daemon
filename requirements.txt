@@ -2,3 +2,5 @@ canvasapi~=3.4.0
 notion-client~=2.7.0
 icalendar~=7.0
 requests
+pytest-playwright~=0.9.0
+pytest~=9.1

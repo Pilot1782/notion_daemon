@@ -1,0 +1,5 @@
+privVars.py
+.venv/
+venv/
+auth.json
+calendar_notion_sync.log
