@@ -75,7 +75,7 @@ def updateReminders(pages: list) -> None:
             f.write("{}")
 
     with sync_playwright() as playwright:
-        browser = playwright.firefox.launch(headless=False, slow_mo=500)
+        browser = playwright.firefox.launch(headless=True, slow_mo=500)
         context = browser.new_context(storage_state="auth.json")
 
         context.tracing.start(name="trace", screenshots=True, snapshots=True)
