@@ -15,6 +15,8 @@ LOG_FILE = "calendar_notion_sync.log"
 SUMMARY_CLASS_PAT = re.compile(r" \[\d{4}[^-]+-([^-]+-[^-]+[^]]+)]$")
 SUMMARY_TITLE_PAT = re.compile(r" \[[^]]+]$")
 
+now = datetime.now(timezone.utc)
+week_out = now + timedelta(days=7 * 3)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -160,9 +162,6 @@ def fetch_existing_event_ids() -> set[str]:
 
 
 existing_event_ids = fetch_existing_event_ids()
-
-now = datetime.now(timezone.utc)
-week_out = now + timedelta(days=14)
 
 logger.info(
     "Scanning calendar events due between %s and %s",

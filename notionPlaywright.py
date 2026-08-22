@@ -1,8 +1,34 @@
+import logging
 import os
+from logging.handlers import RotatingFileHandler
 
 from playwright.sync_api import sync_playwright, Page
 
+from main import LOG_FILE
 from privVars import MICROSOFT_USER, MICROSOFT_PASS
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter(
+    "%(asctime)s [%(levelname)s] %(name)s:%(lineno)d - %(message)s"
+)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.INFO)
+console_handler.setFormatter(formatter)
+
+file_handler = RotatingFileHandler(
+    LOG_FILE,
+    maxBytes=50 * 1024 * 1024,
+    backupCount=5,
+    encoding="utf-8",
+)
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(formatter)
+
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
 
 
 def signIn(page: Page, pUrl) -> None:
@@ -14,6 +40,7 @@ def signIn(page: Page, pUrl) -> None:
             return
         elif page.get_by_role("button", name="Microsoft").is_visible():
             break
+    logger.info("Signing in")
 
     with page.expect_popup() as page1_info:
         page.get_by_role("button", name="Microsoft").click()
@@ -22,8 +49,8 @@ def signIn(page: Page, pUrl) -> None:
     try:
         page1.get_by_role("textbox", name="Enter your email, phone, or").wait_for(
             state="visible")
-    except:
-        pass
+    except Exception:
+        logger.exception("Error occurred while waiting for email input")
 
     if not page1.is_closed():
         page1.get_by_role("textbox", name="Enter your email, phone, or").click()
@@ -40,14 +67,16 @@ def signIn(page: Page, pUrl) -> None:
     try:
         while not page.url.startswith("https://app.notion.com/p/"):
             page.wait_for_timeout(500)
-    except:
+    except Exception:
         pass
 
     page.wait_for_timeout(5_000)
+    logger.info("Signed in")
 
 
 def updateReminder(page: Page, pUrl):
     page.goto(pUrl)
+    logger.info(f"Updating reminder for {pUrl}")
 
     for _ in range(10):
         page.wait_for_timeout(500)
@@ -58,6 +87,10 @@ def updateReminder(page: Page, pUrl):
         elif page.url.startswith("https://app.notion.com/p/"):
             break
 
+    if page.get_by_role("button", name="Close", exact=True).is_visible():
+        page.get_by_role("button", name="Close", exact=True).click()
+
+    logger.debug("Page done loading")
     props = page.locator('[aria-label="Page properties"]').first
     row = props.get_by_role("row").filter(
         has=page.get_by_role("cell").filter(has_text="Date").first).first
@@ -67,6 +100,7 @@ def updateReminder(page: Page, pUrl):
     page.get_by_role("menuitem").filter(has_text="5 minutes before").first.click()
     page.locator("body").press("Escape")
     page.wait_for_timeout(1_000)
+    logger.info("Page done loading")
 
 
 def updateReminders(pages: list) -> None:
@@ -94,7 +128,8 @@ def updateReminders(pages: list) -> None:
                 context.tracing.group_end()
             page.close()
         except Exception as err:
-            print(err)
+            logger.error(f"Error occurred while updating reminders: {err}")
+            logger.exception(err)
         finally:
             context.tracing.stop(path="trace.zip")
             context.close()
