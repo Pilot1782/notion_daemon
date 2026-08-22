@@ -4,7 +4,6 @@ from logging.handlers import RotatingFileHandler
 
 from playwright.sync_api import sync_playwright, Page
 
-from main import LOG_FILE
 from privVars import MICROSOFT_USER, MICROSOFT_PASS
 
 logger = logging.getLogger(__name__)
@@ -18,6 +17,7 @@ console_handler = logging.StreamHandler()
 console_handler.setLevel(logging.INFO)
 console_handler.setFormatter(formatter)
 
+LOG_FILE = "calendar_notion_sync.log"
 file_handler = RotatingFileHandler(
     LOG_FILE,
     maxBytes=50 * 1024 * 1024,
